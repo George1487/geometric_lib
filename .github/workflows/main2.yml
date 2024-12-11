@@ -1,0 +1,45 @@
+name: C++ Unit Tests with CMake
+
+on:
+  push:
+    branches:
+      - new_features_374131_docs
+      - main
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up CMake
+      uses: jwlawson/actions-setup-cmake@v1
+      with:
+        cmake-version: '3.13'  # Укажите нужную версию CMake
+
+    - name: Install Google Test
+      run: |
+        git clone https://github.com/google/googletest.git
+        cd googletest
+        mkdir build
+        cd build
+        cmake ..  # Генерация файлов сборки для Google Test
+        make      # Сборка Google Test
+        sudo cp lib/*.a /usr/lib  # Копирование статических библиотек
+
+    - name: Build your project
+      run: |
+        mkdir build
+        cd build
+        cmake ..  # Генерация файлов сборки для вашего проекта
+        make      # Сборка вашего проекта
+
+    - name: Run tests
+      run: |
+        cd build
+        ./your_test_executable  # Замените на имя вашего исполняемого файла с тестами
