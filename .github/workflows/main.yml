@@ -1,0 +1,45 @@
+name: C++ Unit Tests with Google Test
+
+on:
+  push:
+    branches:
+      - new_features_374131_docs
+      - main
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up CMake
+      uses: jwlawson/actions-setup-cmake@v1
+      with:
+        cmake-version: '3.12'
+
+    - name: Install gtest (для Ubuntu)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgtest-dev
+        sudo apt-get install -y cmake
+        cd /usr/src/gtest
+        sudo cmake .
+        sudo cp *.a /usr/lib
+
+    - name: Build
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        cmake --build . --config Release
+
+    - name: Run tests
+      run: |
+        cd build
+        ctest --output-on-failure
